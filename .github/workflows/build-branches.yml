@@ -3,6 +3,7 @@ name: Build actions on pull requets
 on:
   push:
     branches:
+    - '*'
     - '!master'
     - '!release'
 
