@@ -1,10 +1,9 @@
 name: Build actions on release branch
 
-on: push
-# on:
-#   push:
-#     branches:
-#       - master
+on:
+  push:
+    branches:
+    - master
 
 jobs:
   build:
@@ -21,32 +20,29 @@ jobs:
           git config --global user.name "iadvize/actions Build JS actions workflow"
           git config --global user.email "github-workflow@iadvize.com"
 
-      - name: 'Copy script'
-        run: cp .github/build-javascript-actions.sh /tmp/build-javascript-actions.sh
-
       - name: 'Checkout release branch'
         run: git checkout release
 
       - name: 'Merge master on release'
-        run : git merge origin/NO-TICKET-javascript-action-build --ff
+        run : git merge origin/master --strategy-option=theirs --no-ff
 
       - name: 'Build Javascript actions'
-        run: /tmp/build-javascript-actions.sh
+        uses: iadvize/actions/build-javascript-actions@4ae70012f71befd24405db00c528a3ac22b0ca23
+        with:
+          build_directory: 'lib'
 
       - name: 'Commit and push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ ! -n "$(git status --porcelain)" ]; then
-            echo "Nothing to commit. Done.";
-            exit 0;
-          fi
-
           authenticatedUrl="https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
           git remote set-url origin $authenticatedUrl
 
-          git add .
-          git commit -m "Built Javascript actions"
+          if [ ! -n "$(git status --porcelain)" ]; then
+            echo "Nothing to commit.";
+          else
+            git add .
+            git commit -m "Built Javascript actions"
+          fi
 
           git push
-
