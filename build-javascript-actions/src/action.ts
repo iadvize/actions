@@ -49,17 +49,19 @@ async function cleanActionGitignore(
   }
 }
 
-async function buildAction(
-  actionDirectory: string,
-  installCommand: string,
-  buildCommand: string
-) {
-  const context = {
-    cwd: actionDirectory,
-  };
+function logExecResult(result: { stdout: string, stderr: string }) {
+  const {
+    stdout,
+    stderr,
+  } = result;
 
-  await exec(installCommand, context);
-  await exec(buildCommand, context);
+  if (stderr) {
+    console.error(stderr);
+  }
+
+  if (stdout) {
+    console.log(stdout);
+  }
 }
 
 export async function run() {
@@ -67,7 +69,7 @@ export async function run() {
     const actionsDirectory = core.getInput('actions_directory', { required: true });
 
     // directory where javascript build output is stored. null means no build
-    const buildDirectory = core.getInput('build_directory') || null
+    const buildDirectory = core.getInput('build_directory') || null;
 
     const installCommand = core.getInput('install_command', { required: true });
     const buildCommand = core.getInput('build_command', { required: true });
@@ -80,12 +82,17 @@ export async function run() {
       console.log(`Cleaning ${actionDirectory} .gitignore`);
       await cleanActionGitignore(actionDirectory, buildDirectory);
 
-      console.log(`Building ${actionDirectory}`);
-      await buildAction(
-        actionDirectory,
-        installCommand,
-        buildCommand
-      );
+      const context = {
+        cwd: actionDirectory,
+      };
+
+      console.log(`Installing ${actionDirectory}`);
+      logExecResult(await exec(installCommand, context));
+
+      if (buildCommand) {
+        console.log(`Building ${actionDirectory}`);
+        logExecResult(await exec(buildCommand, context));
+      }
 
       console.log(`${actionDirectory} done`);
     }
