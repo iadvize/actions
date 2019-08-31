@@ -98,7 +98,7 @@ jobs:
           git push
 ```
 
-The `iadvize/actions/build-javascript-actions` version will go in each Javascript action to remove `node_modules` and
+The `iadvize/actions/build-javascript-actions` action will go in each Javascript action to remove `node_modules` and
 `<build_directory>` lines in the local `.gitignore`, install and build if necessary.
 
 ### Inputs
