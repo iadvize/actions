@@ -1,0 +1,29 @@
+{
+  "name": "iadvize-node12-build-javascript-actions",
+  "version": "0.0.0",
+  "main": "lib/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iadvize/actions.git"
+  },
+  "keywords": [
+    "iAdvize",
+    "actions",
+    "github"
+  ],
+  "author": "Guillaume Clochard <guillaume.clochard@iadvize.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.0.0",
+    "fs-extra": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^8.0.0",
+    "@types/node": "^12.7.3",
+    "typescript": "^3.6.2"
+  }
+}
