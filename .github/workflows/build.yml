@@ -24,7 +24,7 @@ jobs:
         run: git checkout release
 
       - name: 'Merge master on release'
-        run : git merge origin/master --strategy-option=theirs --no-ff
+        run : git merge origin/master --strategy=theirs --no-ff
 
       - name: 'Build Javascript actions'
         uses: iadvize/actions/build-javascript-actions@4ae70012f71befd24405db00c528a3ac22b0ca23
@@ -35,15 +35,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ ! -n "$(git status --porcelain)" ]; then
-            echo "Nothing to commit. Done.";
-            exit 0;
-          fi
-
           authenticatedUrl="https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
           git remote set-url origin $authenticatedUrl
 
-          git add .
-          git commit -m "Built Javascript actions"
+          if [ ! -n "$(git status --porcelain)" ]; then
+            echo "Nothing to commit. Done.";
+            exit 0;
+          else
+            git add .
+            git commit -m "Built Javascript actions"
+          fi
 
           git push
