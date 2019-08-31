@@ -25,10 +25,10 @@ jobs:
         run: cp .github/build-javascript-actions.sh /tmp/build-javascript-actions.sh
 
       - name: 'Checkout release branch'
-        run: git checkout origin/release
+        run: git checkout release
 
       - name: 'Merge master on release'
-        run : git merge origin/master --ff
+        run : git merge origin/NO-TICKET-javascript-action-build --ff
 
       - name: 'Build Javascript actions'
         run: /tmp/build-javascript-actions.sh
