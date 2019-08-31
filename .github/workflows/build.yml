@@ -25,7 +25,7 @@ jobs:
         run: cp .github/build-javascript-actions.sh /tmp/build-javascript-actions.sh
 
       - name: 'Checkout release branch'
-        run: git checkout release
+        run: git checkout origin/release
 
       - name: 'Merge master on release'
         run : git merge origin/master --ff
