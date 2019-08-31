@@ -76,7 +76,7 @@ jobs:
         run : git merge master --ff
 
       - name: 'Build Javascript actions'
-        uses: iadvize/actions/build-javascript-actions@release
+        uses: iadvize/actions/build-javascript-actions@<version>
         with:
           build_directory: 'lib'
 
@@ -98,8 +98,9 @@ jobs:
           git push
 ```
 
-### Options
+The `iadvize/actions/build-javascript-actions` version will go in each Javascript action to remove `node_modules` and
+`<build_directory>` lines in the local `.gitignore`, install and build if necessary.
+
+### Inputs
 
 See [`action.yml`](./action.yml) for the list of action inputs.
-
-
