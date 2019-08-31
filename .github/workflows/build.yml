@@ -28,7 +28,7 @@ jobs:
         run : git merge origin/NO-TICKET-javascript-action-build --ff
 
       - name: 'Build Javascript actions'
-        uses: iadvize/actions/build-javascript-actions@51cc565c224351cfce34e9b42adc4dada8b29c93
+        uses: iadvize/actions/build-javascript-actions@release
 
       - name: 'Commit and push'
         env:
