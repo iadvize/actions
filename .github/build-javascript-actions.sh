@@ -38,7 +38,7 @@ buildAction() {
   directory=$1
 
   (cd $directory && npm install)
-  (cd $directory && npm build)
+  (cd $directory && npm run build)
 }
 
 for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
