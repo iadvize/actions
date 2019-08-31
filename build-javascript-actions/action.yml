@@ -24,7 +24,7 @@ inputs:
   build_command:
     description: The command to build the action
     required: false
-    default: 'npm build'
+    default: 'npm run build'
 
 runs:
   using: 'node12'
