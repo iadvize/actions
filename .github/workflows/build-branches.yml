@@ -1,0 +1,49 @@
+name: Build actions on pull requets
+
+on:
+  push:
+    branches:
+    - '!master'
+    - '!release'
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    name: 'Build Javascript actions'
+
+    steps:
+      - name: 'Checkout directory'
+        uses: actions/checkout@v1
+
+      - name: 'Init Git name'
+        run: |
+          git config --global user.name "iadvize/actions Build JS actions workflow"
+          git config --global user.email "github-workflow@iadvize.com"
+
+      - name: 'Checkout release branch'
+        env:
+          branch: ${{ github.ref }}
+        run: git checkout -B release-$BRANCH origin/$BRANCH
+
+      - name: 'Build Javascript actions'
+        uses: iadvize/actions/build-javascript-actions@4ae70012f71befd24405db00c528a3ac22b0ca23
+        with:
+          build_directory: 'lib'
+
+      - name: 'Commit and push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          authenticatedUrl="https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
+          git remote set-url origin $authenticatedUrl
+
+          if [ ! -n "$(git status --porcelain)" ]; then
+            echo "Nothing to commit.";
+          else
+            git add .
+            git commit -m "Built Javascript actions"
+          fi
+
+          git push
+
