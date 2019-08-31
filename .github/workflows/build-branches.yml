@@ -55,7 +55,7 @@ jobs:
             echo "Nothing to commit.";
           else
             git add .
-            git commit -m "Built Javascript actions"
+            git commit --quiet --message "Built Javascript actions"
           fi
 
           git push origin HEAD
