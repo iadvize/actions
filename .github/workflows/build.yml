@@ -4,7 +4,7 @@ on: push
 # on:
 #   push:
 #     branches:
-#     - master
+#       - master
 
 jobs:
   build:
@@ -21,6 +21,9 @@ jobs:
           git config --global user.name "iadvize/actions Build JS actions workflow"
           git config --global user.email "github-workflow@iadvize.com"
 
+      - name: 'Copy script'
+        run: cp .github/build-javascript-actions.sh /tmp/build-javascript-actions.sh
+
       - name: 'Checkout release branch'
         run: git checkout release
 
@@ -28,7 +31,7 @@ jobs:
         run : git merge origin/NO-TICKET-javascript-action-build --ff
 
       - name: 'Build Javascript actions'
-        uses: iadvize/actions/build-javascript-actions@release
+        run: /tmp/build-javascript-actions.sh
 
       - name: 'Commit and push'
         env:
