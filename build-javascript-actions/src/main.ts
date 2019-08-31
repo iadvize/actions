@@ -64,18 +64,13 @@ async function buildAction(
 
 async function run() {
   try {
-    const githubToken = process.env.INPUT_GITHUB_TOKEN;
-    if (!githubToken) {
-      throw new Error('Missing github_token input');
-    }
-
-    const actionsDirectory = process.env.INPUT_ACTIONS_DIRECTORY || './';
+    const actionsDirectory = core.getInput('actions_directory', { required: true });
 
     // directory where javascript build output is stored. null means no build
-    const buildDirectory = process.env.build_directory || null;
+    const buildDirectory = core.getInput('build_directory') || null
 
-    const installCommand = process.env.INPUT_INSTALL_COMMAND || 'npm install';
-    const buildCommand = process.env.INPUT_BUILD_COMMAND || 'echo Nothing to build';
+    const installCommand = core.getInput('install_command', { required: true });
+    const buildCommand = core.getInput('build_command', { required: true });
 
     const actionDirectories = await findJavascriptActions(actionsDirectory);
 

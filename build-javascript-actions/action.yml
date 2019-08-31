@@ -3,10 +3,6 @@ author: 'Guillaume Clochard <guillaume.clochard@iadvize.com>'
 description: 'Use this actions to build a monorepo of Javascript Github actions'
 
 inputs:
-  github_token:
-    description: 'The GITHUB_TOKEN to use to push to repo'
-    required: true
-
   actions_directory:
     description: 'Where are the actions?'
     required: false
