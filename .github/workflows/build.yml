@@ -24,7 +24,7 @@ jobs:
         run: git checkout release
 
       - name: 'Merge master on release'
-        run : git merge origin/master --strategy=theirs --no-ff
+        run : git merge origin/master --strategy-option=theirs --no-ff
 
       - name: 'Build Javascript actions'
         uses: iadvize/actions/build-javascript-actions@4ae70012f71befd24405db00c528a3ac22b0ca23
