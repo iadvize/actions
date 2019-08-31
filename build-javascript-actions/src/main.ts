@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { promisify } from 'util';
 
-import core from '@actions/core';
+import * as core from '@actions/core';
 
 const exec = promisify(childProcess.exec);
 
