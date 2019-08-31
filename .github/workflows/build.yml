@@ -39,8 +39,7 @@ jobs:
           git remote set-url origin $authenticatedUrl
 
           if [ ! -n "$(git status --porcelain)" ]; then
-            echo "Nothing to commit. Done.";
-            exit 0;
+            echo "Nothing to commit.";
           else
             git add .
             git commit -m "Built Javascript actions"
