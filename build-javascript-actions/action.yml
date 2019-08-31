@@ -2,13 +2,6 @@ name: 'Build Javascript actions'
 author: 'Guillaume Clochard <guillaume.clochard@iadvize.com>'
 description: 'Use this actions to build a monorepo of Javascript Github actions'
 
-branding:
-  icon: 'package'
-  color: 'blue'
-
-using: 'node12'
-main: 'main.js'
-
 inputs:
   github_token:
     description: 'The GITHUB_TOKEN to use to push to repo'
@@ -32,3 +25,11 @@ inputs:
     description: 'The command to build the action'
     required: false
     default: 'npm build'
+
+runs:
+  using: 'node12'
+  main: 'main.js'
+
+branding:
+  icon: 'package'
+  color: 'blue'
