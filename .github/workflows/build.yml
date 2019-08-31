@@ -1,9 +1,10 @@
 name: Build actions on release branch
 
-on:
-  push:
-    branches:
-      - master
+on: push
+# on:
+#   push:
+#     branches:
+#       - master
 
 jobs:
   build:
