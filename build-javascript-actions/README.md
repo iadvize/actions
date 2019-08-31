@@ -1,7 +1,7 @@
 Build Javascript Github Actions Action
 ======================================
 
-This Github action build Github actions store in a monorepo.
+This Github action build Github actions stored in a monorepo.
 
 ## Why ?
 
