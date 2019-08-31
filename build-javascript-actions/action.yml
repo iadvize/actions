@@ -1,0 +1,34 @@
+name: 'Build Javascript actions'
+author: 'Guillaume Clochard <guillaume.clochard@iadvize.com>'
+description: 'Use this actions to build a monorepo of Javascript Github actions'
+
+branding:
+  icon: 'package'
+  color: 'blue'
+
+using: 'node12'
+main: 'main.js'
+
+inputs:
+  github_token:
+    description: 'The GITHUB_TOKEN to use to push to repo'
+    required: true
+
+  actions_directory:
+    description: 'Where are the actions?'
+    required: false
+    default: './'
+
+  build_directory:
+    description: 'Where is built javascript store in an action directory?'
+    required: false
+
+  install_command:
+    description: 'The command to install javascript libs for the action'
+    required: false
+    default: 'npm install'
+
+  build_command:
+    description: 'The command to build the action'
+    required: false
+    default: 'npm build'
