@@ -24,8 +24,20 @@ jobs:
 
       - name: 'Checkout release branch'
         env:
-          branch: ${{ github.ref }}
-        run: git checkout -B release-$BRANCH origin/$BRANCH
+          REF: ${{ github.ref }}
+        run: >
+          branch=${REF#"refs/heads/"}
+          releaseBranch=release-$branch
+
+          if git fetch origin $releaseBranch; then
+            echo Release branch origin/$releaseBranch already exists
+
+            git checkout $releaseBranch
+          else
+            echo Release branch $releaseBranch does not exist
+
+            git checkout -b $releaseBranch origin/$branch
+          fi
 
       - name: 'Build Javascript actions'
         uses: iadvize/actions/build-javascript-actions@a469e9a766612ef2940829a884df46df127e9c6c
@@ -46,5 +58,5 @@ jobs:
             git commit -m "Built Javascript actions"
           fi
 
-          git push
+          git push origin HEAD
 
