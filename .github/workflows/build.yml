@@ -3,7 +3,7 @@ name: Build actions on release branch
 on:
   push:
     branches:
-      - master
+    - master
 
 jobs:
   build:
@@ -20,9 +20,6 @@ jobs:
           git config --global user.name "iadvize/actions Build JS actions workflow"
           git config --global user.email "github-workflow@iadvize.com"
 
-      - name: 'Copy script'
-        run: cp .github/build-javascript-actions.sh /tmp/build-javascript-actions.sh
-
       - name: 'Checkout release branch'
         run: git checkout release
 
@@ -30,7 +27,9 @@ jobs:
         run : git merge origin/master --ff
 
       - name: 'Build Javascript actions'
-        run: /tmp/build-javascript-actions.sh
+        run: iadvize/actions/build-javascript-actions@4ae70012f71befd24405db00c528a3ac22b0ca23
+        with:
+          build_directory: 'lib'
 
       - name: 'Commit and push'
         env:
@@ -48,4 +47,3 @@ jobs:
           git commit -m "Built Javascript actions"
 
           git push
-
