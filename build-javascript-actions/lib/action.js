@@ -45,7 +45,6 @@ function cleanActionGitignore(actionDirectory, buildDirectory) {
         if (!gitignoreExists) { // nothing to do
             return;
         }
-        yield exec_1.exec(`ls -all`);
         yield exec_1.exec(`sed -i /node_modules/d ${gitignorePath}`);
         if (buildDirectory) {
             yield exec_1.exec(`sed -i /${buildDirectory}/d ${gitignorePath}`);
@@ -70,7 +69,7 @@ function run() {
                 };
                 console.log(`Installing ${actionDirectory}`);
                 yield exec_1.exec(installCommand, context);
-                if (buildCommand) {
+                if (buildDirectory) {
                     console.log(`Building ${actionDirectory}`);
                     yield exec_1.exec(buildCommand, context);
                 }
