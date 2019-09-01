@@ -5,7 +5,27 @@ import childProcess from 'child_process';
 jest.mock('child_process');
 
 describe('exec', () => {
-  it('should spawn the command with arguments splited correctly', async () => {
+  it('should spawn the command with arguments splited correctly without options', async () => {
+    (childProcess.spawn as jest.Mock).mockReturnValue({
+      on: jest.fn().mockImplementation(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (event: string, callback: (...args: any[]) => void) => {
+          if (event === 'close') {
+            // eslint-disable-next-line standard/no-callback-literal
+            callback(0);
+          }
+        }
+      ),
+    });
+
+    await exec('ls -a -l');
+
+    expect(childProcess.spawn).toHaveBeenCalledWith('ls', ['-a', '-l'], {
+      stdio: 'inherit',
+    });
+  });
+
+  it('should spawn the command with arguments splited correctly with options', async () => {
     (childProcess.spawn as jest.Mock).mockReturnValue({
       on: jest.fn().mockImplementation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
