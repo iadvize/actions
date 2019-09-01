@@ -41,7 +41,6 @@ async function cleanActionGitignore(
     return;
   }
 
-  await exec(`ls -all`);
   await exec(`sed -i /node_modules/d ${gitignorePath}`);
   if (buildDirectory) {
     await exec(`sed -i /${buildDirectory}/d ${gitignorePath}`);
