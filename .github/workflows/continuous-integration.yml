@@ -19,10 +19,12 @@ jobs:
       - name: 'Install javascript actions'
         run: >
           for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
+            echo "Found $directory"
             if [ ! -f "$directory/package.json" ]; then
               echo "$directory does not contains javascript. Skipping"
               continue;
             else
+              echo "Install $directory"
               npm install
             fi
           done
@@ -38,10 +40,12 @@ jobs:
       - name: 'Lint all actions'
         run: >
           for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
+            echo "Found $directory"
             if [ ! -f "$directory/package.json" ]; then
               echo "$directory does not contains javascript. Skipping"
               continue;
             else
+              echo "Lint $directory"
               npm run lint
             fi
           done
@@ -57,10 +61,12 @@ jobs:
       - name: 'Test all actions'
         run: >
           for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
+            echo "Found $directory"
             if [ ! -f "$directory/package.json" ]; then
               echo "$directory does not contains javascript. Skipping"
               continue;
             else
+              echo "Test $directory"
               npm run test
             fi
           done
