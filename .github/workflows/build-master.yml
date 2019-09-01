@@ -27,7 +27,7 @@ jobs:
         run : git merge origin/master --strategy-option=theirs --no-ff
 
       - name: 'Build Javascript actions'
-        uses: iadvize/actions/build-javascript-actions@a469e9a766612ef2940829a884df46df127e9c6c
+        uses: iadvize/actions/build-javascript-actions@4a4cb77bec17f7e475cd876c79b2e00e62e8110b
         with:
           build_directory: 'lib'
 
