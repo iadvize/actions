@@ -18,6 +18,11 @@ jobs:
           message='Hello! You can find the temporary released actions in the `'release-$branch'` branch'
           echo "::[set-output name=message;]$message"
 
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+
       - name: 'Comment on PR'
         uses: iadvize/actions/issue-comment@d25c66574f9e233663f1bb0e7efa70628abc12ea
         # if: github.event.action == 'opened'
