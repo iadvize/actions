@@ -25,7 +25,7 @@ jobs:
               continue;
             else
               echo "Install $directory"
-              npm install
+              (cd $directory; npm install)
             fi
           done
 
@@ -46,7 +46,7 @@ jobs:
               continue;
             else
               echo "Lint $directory"
-              npm run lint
+              (cd $directory; npm run lint)
             fi
           done
 
@@ -67,7 +67,7 @@ jobs:
               continue;
             else
               echo "Test $directory"
-              npm run test
+              (cd $directory; npm run test)
             fi
           done
 
