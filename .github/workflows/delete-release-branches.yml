@@ -21,6 +21,7 @@ jobs:
         if: github.event.ref_type == 'branch'
         env:
           REF: ${{ github.event.ref }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           branch=${REF#"refs/heads/"}
           releaseBranch=release-$branch
