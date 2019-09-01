@@ -1,6 +1,6 @@
-jest.mock('./action');
-
 import { run } from './action';
+
+jest.mock('./action');
 
 describe('main', () => {
   it('should run action', () => {
@@ -8,4 +8,4 @@ describe('main', () => {
 
     expect(run).toHaveBeenCalledWith();
   });
-})
+});
