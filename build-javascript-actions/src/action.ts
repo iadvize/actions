@@ -72,7 +72,7 @@ export async function run() {
       console.log(`Installing ${actionDirectory}`);
       await exec(installCommand, context);
 
-      if (buildCommand) {
+      if (buildDirectory) {
         console.log(`Building ${actionDirectory}`);
         await exec(buildCommand, context);
       }
