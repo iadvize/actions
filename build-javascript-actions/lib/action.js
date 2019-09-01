@@ -19,12 +19,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const child_process_1 = __importDefault(require("child_process"));
 const path_1 = __importDefault(require("path"));
 const fs_extra_1 = __importDefault(require("fs-extra"));
-const util_1 = require("util");
 const core = __importStar(require("@actions/core"));
-const exec = util_1.promisify(child_process_1.default.exec);
+const exec_1 = require("./exec");
 function findJavascriptActions(rootDir) {
     return __awaiter(this, void 0, void 0, function* () {
         const contents = yield fs_extra_1.default.readdir(rootDir);
@@ -47,20 +45,12 @@ function cleanActionGitignore(actionDirectory, buildDirectory) {
         if (!gitignoreExists) { // nothing to do
             return;
         }
-        yield exec(`sed -i '/node_modules/d' ${gitignorePath}`);
+        yield exec_1.exec(`ls -all`);
+        yield exec_1.exec(`sed -i /node_modules/d ${gitignorePath}`);
         if (buildDirectory) {
-            yield exec(`sed -i '/${buildDirectory}/d' ${gitignorePath}`);
+            yield exec_1.exec(`sed -i /${buildDirectory}/d ${gitignorePath}`);
         }
     });
-}
-function logExecResult(result) {
-    const { stdout, stderr, } = result;
-    if (stderr) {
-        console.error(stderr);
-    }
-    if (stdout) {
-        console.log(stdout);
-    }
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -79,10 +69,10 @@ function run() {
                     cwd: actionDirectory,
                 };
                 console.log(`Installing ${actionDirectory}`);
-                logExecResult(yield exec(installCommand, context));
+                yield exec_1.exec(installCommand, context);
                 if (buildCommand) {
                     console.log(`Building ${actionDirectory}`);
-                    logExecResult(yield exec(buildCommand, context));
+                    yield exec_1.exec(buildCommand, context);
                 }
                 console.log(`${actionDirectory} done`);
             }
