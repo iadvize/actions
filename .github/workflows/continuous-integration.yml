@@ -1,0 +1,66 @@
+name: Continous integration
+
+on:
+  push:
+    branches:
+    - '!release'
+
+jobs:
+  checkout:
+    runs-on: ubuntu-18.04
+
+    name: 'Setup repository'
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v1
+
+      - name: 'Install javascript actions'
+        run: >
+          for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
+            if [ ! -f "$directory/package.json" ]; then
+              echo "$directory does not contains javascript. Skipping"
+              continue;
+            else
+              npm install
+            fi
+          done
+
+  lint:
+    runs-on: ubuntu-18.04
+
+    name: 'Lint actions'
+
+    needs: checkout
+
+    steps:
+      - name: 'Lint all actions'
+        run: >
+          for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
+            if [ ! -f "$directory/package.json" ]; then
+              echo "$directory does not contains javascript. Skipping"
+              continue;
+            else
+              npm run lint
+            fi
+          done
+
+  test:
+    runs-on: ubuntu-18.04
+
+    name: 'Test actions'
+
+    needs: checkout
+
+    steps:
+      - name: 'Test all actions'
+        run: >
+          for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
+            if [ ! -f "$directory/package.json" ]; then
+              echo "$directory does not contains javascript. Skipping"
+              continue;
+            else
+              npm run test
+            fi
+          done
+
