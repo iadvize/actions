@@ -3,6 +3,7 @@ name: Continous integration
 on:
   push:
     branches:
+    - '*'
     - '!release'
 
 jobs:
