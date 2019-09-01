@@ -20,7 +20,7 @@ jobs:
 
       - name: 'Comment on PR'
         uses: iadvize/actions/issue-comment@d25c66574f9e233663f1bb0e7efa70628abc12ea
-        if: github.event.action == 'opened'
+        # if: github.event.action == 'opened'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue_number: ${{ github.event.number }}
