@@ -19,6 +19,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const fs_extra_1 = __importDefault(require("fs-extra"));
+const core = __importStar(require("@actions/core"));
+const exec_1 = require("./exec");
+const action_1 = require("./action");
 jest.mock('./exec', () => ({
     exec: jest.fn().mockImplementation(() => {
         return Promise.resolve();
@@ -26,10 +30,6 @@ jest.mock('./exec', () => ({
 }));
 jest.mock('fs-extra');
 jest.mock('@actions/core');
-const fs_extra_1 = __importDefault(require("fs-extra"));
-const core = __importStar(require("@actions/core"));
-const exec_1 = require("./exec");
-const action_1 = require("./action");
 describe('action', () => {
     beforeAll(() => {
         console.log = jest.fn();
@@ -37,7 +37,7 @@ describe('action', () => {
     afterAll(() => {
         console.log.mockRestore();
     });
-    fs_extra_1.default.readdir.mockImplementation((_) => Promise.resolve(['action1/', 'action2/', 'file.json']));
+    fs_extra_1.default.readdir.mockImplementation(() => Promise.resolve(['action1/', 'action2/', 'file.json']));
     fs_extra_1.default.statSync.mockImplementation((path) => ({
         isDirectory: () => path.indexOf('.') < 0,
     }));

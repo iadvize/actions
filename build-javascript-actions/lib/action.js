@@ -42,7 +42,8 @@ function cleanActionGitignore(actionDirectory, buildDirectory) {
     return __awaiter(this, void 0, void 0, function* () {
         const gitignorePath = path_1.default.join(actionDirectory, '.gitignore');
         const gitignoreExists = fs_extra_1.default.existsSync(gitignorePath);
-        if (!gitignoreExists) { // nothing to do
+        if (!gitignoreExists) {
+            // nothing to do
             return;
         }
         yield exec_1.exec(`sed -i /node_modules/d ${gitignorePath}`);
@@ -54,7 +55,9 @@ function cleanActionGitignore(actionDirectory, buildDirectory) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const actionsDirectory = core.getInput('actions_directory', { required: true });
+            const actionsDirectory = core.getInput('actions_directory', {
+                required: true,
+            });
             // directory where javascript build output is stored. null means no build
             const buildDirectory = core.getInput('build_directory') || null;
             const installCommand = core.getInput('install_command', { required: true });
