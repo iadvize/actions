@@ -15,7 +15,7 @@ jobs:
         env:
           branch: ${{ github.event.head_ref }}
         run: |
-          message="Hello! You can find the temporary released actions in the `release-$branch` branch"
+          message='Hello! You can find the temporary released actions in the `'release-$branch'` branch'
           echo "::[set-output name=message;]$message"
 
       - name: 'Comment on PR'
