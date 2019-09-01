@@ -7,6 +7,8 @@ we're using at [iAdvize](https://github.com/iadvize).
 It contains : 
 
 - [`iadvize/actions/build-javascript-actions`](./build-javascript-actions) 
+- [`iadvize/actions/find-pull-request`](./find-pull-request) 
+- [`iadvize/actions/issue-comment`](./issue-comment) 
 
 ## Usage
 
