@@ -10,14 +10,14 @@ jobs:
   checkout:
     runs-on: ubuntu-18.04
 
-    name: 'Setup repository'
+    name: 'Install, lint and test'
 
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v1
 
       - name: 'Install javascript actions'
-        run: >
+        run: |
           for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
             echo "Found $directory"
             if [ ! -f "$directory/package.json" ]; then
@@ -29,16 +29,8 @@ jobs:
             fi
           done
 
-  lint:
-    runs-on: ubuntu-18.04
-
-    name: 'Lint actions'
-
-    needs: checkout
-
-    steps:
       - name: 'Lint all actions'
-        run: >
+        run: |
           for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
             echo "Found $directory"
             if [ ! -f "$directory/package.json" ]; then
@@ -50,16 +42,8 @@ jobs:
             fi
           done
 
-  test:
-    runs-on: ubuntu-18.04
-
-    name: 'Test actions'
-
-    needs: checkout
-
-    steps:
       - name: 'Test all actions'
-        run: >
+        run: |
           for directory in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*'); do
             echo "Found $directory"
             if [ ! -f "$directory/package.json" ]; then
