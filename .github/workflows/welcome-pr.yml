@@ -16,7 +16,7 @@ jobs:
           branch: ${{ github.event.head_ref }}
         run: |
           message='Hello You can find the temporary released actions in the release-$branch branch'
-          echo "::[set-output name=message]hello"
+          echo "##[set-output name=message]hello"
 
       - name: Dump steps context
         env:
