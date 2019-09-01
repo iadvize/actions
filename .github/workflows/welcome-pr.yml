@@ -29,5 +29,5 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue_number: ${{ github.event.number }}
-          comment: ${{ steps.buildMessage.message }}
+          comment: ${{ steps.buildMessage.outputs.message }}
 
