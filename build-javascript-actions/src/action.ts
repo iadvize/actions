@@ -1,11 +1,9 @@
-import childProcess from 'child_process';
 import path from 'path';
 import fs from 'fs-extra';
-import { promisify } from 'util';
 
 import * as core from '@actions/core';
 
-const exec = promisify(childProcess.exec);
+import { exec } from './exec';
 
 async function findJavascriptActions(rootDir: string) {
   const contents = await fs.readdir(rootDir);
@@ -43,24 +41,10 @@ async function cleanActionGitignore(
     return;
   }
 
-  await exec(`sed -i '/node_modules/d' ${gitignorePath}`);
+  await exec(`ls -all`);
+  await exec(`sed -i /node_modules/d ${gitignorePath}`);
   if (buildDirectory) {
-    await exec(`sed -i '/${buildDirectory}/d' ${gitignorePath}`);
-  }
-}
-
-function logExecResult(result: { stdout: string, stderr: string }) {
-  const {
-    stdout,
-    stderr,
-  } = result;
-
-  if (stderr) {
-    console.error(stderr);
-  }
-
-  if (stdout) {
-    console.log(stdout);
+    await exec(`sed -i /${buildDirectory}/d ${gitignorePath}`);
   }
 }
 
@@ -87,11 +71,11 @@ export async function run() {
       };
 
       console.log(`Installing ${actionDirectory}`);
-      logExecResult(await exec(installCommand, context));
+      await exec(installCommand, context);
 
       if (buildCommand) {
         console.log(`Building ${actionDirectory}`);
-        logExecResult(await exec(buildCommand, context));
+        await exec(buildCommand, context);
       }
 
       console.log(`${actionDirectory} done`);
