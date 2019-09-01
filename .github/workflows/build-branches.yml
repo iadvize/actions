@@ -39,6 +39,14 @@ jobs:
             git checkout -b $releaseBranch origin/$branch
           fi
 
+      - name: 'Merge pull request branch on release branch'
+        env:
+          REF: ${{ github.ref }}
+        run: >
+          branch=${REF#"refs/heads/"}
+
+          git merge origin/$branch --strategy-option=theirs --no-ff
+
       - name: 'Build Javascript actions'
         uses: iadvize/actions/build-javascript-actions@a469e9a766612ef2940829a884df46df127e9c6c
         with:
