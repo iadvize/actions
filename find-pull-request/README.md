@@ -23,6 +23,7 @@ jobs:
         id: pr
         with:
           branch: ${{ github.event.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |
           echo "pull request found : $pullExists"
