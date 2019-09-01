@@ -10,6 +10,7 @@ jobs:
       - uses: iadvize/actions/find-pull-request@ee3b3e352fc1d9f5f4a5ab5cd6e7b0d752d2ffb9
         with:
           branch: 'test-pr-event'
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
