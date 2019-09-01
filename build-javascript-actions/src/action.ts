@@ -41,7 +41,6 @@ async function cleanActionGitignore(
     return;
   }
 
-  await exec(`ls -all`);
   await exec(`sed -i /node_modules/d ${gitignorePath}`);
   if (buildDirectory) {
     await exec(`sed -i /${buildDirectory}/d ${gitignorePath}`);
@@ -73,7 +72,7 @@ export async function run() {
       console.log(`Installing ${actionDirectory}`);
       await exec(installCommand, context);
 
-      if (buildCommand) {
+      if (buildDirectory) {
         console.log(`Building ${actionDirectory}`);
         await exec(buildCommand, context);
       }
