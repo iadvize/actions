@@ -8,18 +8,14 @@ import { exec } from './exec';
 async function findJavascriptActions(rootDir: string) {
   const contents = await fs.readdir(rootDir);
 
-  const buildPath = (fileOrDirectoryName: string) => path.join(
-    rootDir,
-    fileOrDirectoryName
-  );
+  const buildPath = (fileOrDirectoryName: string) =>
+    path.join(rootDir, fileOrDirectoryName);
 
   const isDirectory = (path: string) => fs.statSync(path).isDirectory();
-  const isAction = (directoryPath: string) => fs.existsSync(
-    path.join(directoryPath, 'action.yml')
-  );
-  const hasJavascript = (directoryPath: string) => fs.existsSync(
-    path.join(directoryPath, 'package.json')
-  );
+  const isAction = (directoryPath: string) =>
+    fs.existsSync(path.join(directoryPath, 'action.yml'));
+  const hasJavascript = (directoryPath: string) =>
+    fs.existsSync(path.join(directoryPath, 'package.json'));
 
   const javascriptActionDirectoryPaths = contents
     .map(buildPath)
@@ -32,12 +28,13 @@ async function findJavascriptActions(rootDir: string) {
 
 async function cleanActionGitignore(
   actionDirectory: string,
-  buildDirectory: string | null,
+  buildDirectory: string | null
 ) {
   const gitignorePath = path.join(actionDirectory, '.gitignore');
   const gitignoreExists = fs.existsSync(gitignorePath);
 
-  if (!gitignoreExists) { // nothing to do
+  if (!gitignoreExists) {
+    // nothing to do
     return;
   }
 
@@ -49,7 +46,9 @@ async function cleanActionGitignore(
 
 export async function run() {
   try {
-    const actionsDirectory = core.getInput('actions_directory', { required: true });
+    const actionsDirectory = core.getInput('actions_directory', {
+      required: true,
+    });
 
     // directory where javascript build output is stored. null means no build
     const buildDirectory = core.getInput('build_directory') || null;

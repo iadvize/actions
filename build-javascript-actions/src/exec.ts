@@ -8,10 +8,7 @@ export function exec(command: string, options: SpawnOptions = {}) {
   return new Promise((resolve, reject) => {
     const commandParts = command.split(' ');
 
-    const [
-      bin,
-      ...args
-    ] = commandParts;
+    const [bin, ...args] = commandParts;
 
     const process = spawn(bin, args, { ...options, stdio: 'inherit' });
 
@@ -21,6 +18,6 @@ export function exec(command: string, options: SpawnOptions = {}) {
       } else {
         reject(new Error(`${command} failed with code ${code}`));
       }
-    })
+    });
   });
 }
