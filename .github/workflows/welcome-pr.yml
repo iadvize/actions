@@ -21,7 +21,7 @@ jobs:
           echo "##[set-output name=message;]$message"
 
       - name: 'Comment on PR'
-        uses: iadvize/actions/issue-comment@d25c66574f9e233663f1bb0e7efa70628abc12ea
+        uses: iadvize/actions/issue-comment@624f91fd7fc81772cba9d3df9613b4c465ba4af4
         if: github.event.action == 'opened'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
