@@ -2,8 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import * as core from '@actions/core';
-
-import { exec } from './exec';
+import { exec } from '@actions/exec';
 
 async function findJavascriptActions(rootDir: string) {
   const contents = await fs.readdir(rootDir);
@@ -38,9 +37,9 @@ async function cleanActionGitignore(
     return;
   }
 
-  await exec(`sed -i /node_modules/d ${gitignorePath}`);
+  await exec('sed', ['-i', '/node_modules/d', gitignorePath]);
   if (buildDirectory) {
-    await exec(`sed -i /${buildDirectory}/d ${gitignorePath}`);
+    await exec('sed', ['-i', `/${buildDirectory}/d`, gitignorePath]);
   }
 }
 
@@ -69,11 +68,11 @@ export async function run() {
       };
 
       console.log(`Installing ${actionDirectory}`);
-      await exec(installCommand, context);
+      await exec(installCommand, [], context);
 
       if (buildDirectory) {
         console.log(`Building ${actionDirectory}`);
-        await exec(buildCommand, context);
+        await exec(buildCommand, [], context);
       }
 
       console.log(`${actionDirectory} done`);
