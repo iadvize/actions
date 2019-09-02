@@ -12,13 +12,13 @@ jobs:
     steps:
       - name: Dump GitHub context
         env:
-          GITHUB_CONTEXT: ${{ toJson(github.event) }}
+          GITHUB_CONTEXT: ${{ toJson(github.event.pull_request) }}
         run: echo "$GITHUB_CONTEXT"
 
       - name: 'Build comment message'
         id: buildMessage
         env:
-          branch: ${{ github.event.head.ref }}
+          branch: ${{ github.event.pull_request.head.ref }}
         run: |
           releaseBranch=release-$branch
           message='Hello! You can find the temporary released actions in the [`'$releaseBranch'`](https://github.com/$GITHUB_REPOSITORY/tree/'$releaseBranch') branch'
