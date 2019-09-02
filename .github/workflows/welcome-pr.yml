@@ -21,7 +21,7 @@ jobs:
           branch: ${{ github.event.pull_request.head.ref }}
         run: |
           releaseBranch=release-$branch
-          message='Hello! You can find the temporary released actions in the [`'$releaseBranch'`](https://github.com/$GITHUB_REPOSITORY/tree/'$releaseBranch') branch'
+          message='Hello! You can find the temporary released actions in the [`'$releaseBranch'`](https://github.com/'$GITHUB_REPOSITORY'/tree/'$releaseBranch') branch'
 
           echo "##[set-output name=message;]$message"
 
