@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
 import * as core from '@actions/core';
-import { exec } from './exec';
+import { exec } from '@actions/exec';
 
 import { run } from './action';
 
-jest.mock('./exec', () => ({
+jest.mock('@actions/exec', () => ({
   exec: jest.fn().mockImplementation(() => {
     return Promise.resolve();
   }),
@@ -73,17 +73,13 @@ describe('action', () => {
 
       expect(exec).toHaveBeenCalledTimes(2);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        1,
-        'yarn install',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(1, 'yarn install', [], {
+        cwd: 'actions/action1/',
+      });
 
-      expect(exec).toHaveBeenNthCalledWith(
-        2,
-        'yarn install',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(2, 'yarn install', [], {
+        cwd: 'actions/action2/',
+      });
     });
   });
 
@@ -116,27 +112,25 @@ describe('action', () => {
 
       expect(exec).toHaveBeenCalledTimes(4);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        1,
-        'sed -i /node_modules/d actions/action1/.gitignore'
-      );
+      expect(exec).toHaveBeenNthCalledWith(1, 'sed', [
+        '-i',
+        '/node_modules/d',
+        'actions/action1/.gitignore',
+      ]);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        2,
-        'yarn install',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(2, 'yarn install', [], {
+        cwd: 'actions/action1/',
+      });
 
-      expect(exec).toHaveBeenNthCalledWith(
-        3,
-        'sed -i /node_modules/d actions/action2/.gitignore'
-      );
+      expect(exec).toHaveBeenNthCalledWith(3, 'sed', [
+        '-i',
+        '/node_modules/d',
+        'actions/action2/.gitignore',
+      ]);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        4,
-        'yarn install',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(4, 'yarn install', [], {
+        cwd: 'actions/action2/',
+      });
     });
   });
 
@@ -169,49 +163,45 @@ describe('action', () => {
 
       expect(exec).toHaveBeenCalledTimes(8);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        1,
-        'sed -i /node_modules/d actions/action1/.gitignore'
-      );
+      expect(exec).toHaveBeenNthCalledWith(1, 'sed', [
+        '-i',
+        '/node_modules/d',
+        'actions/action1/.gitignore',
+      ]);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        2,
-        'sed -i /build/d actions/action1/.gitignore'
-      );
+      expect(exec).toHaveBeenNthCalledWith(2, 'sed', [
+        '-i',
+        '/build/d',
+        'actions/action1/.gitignore',
+      ]);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        3,
-        'yarn install',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(3, 'yarn install', [], {
+        cwd: 'actions/action1/',
+      });
 
-      expect(exec).toHaveBeenNthCalledWith(
-        4,
-        'yarn run build',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(4, 'yarn run build', [], {
+        cwd: 'actions/action1/',
+      });
 
-      expect(exec).toHaveBeenNthCalledWith(
-        5,
-        'sed -i /node_modules/d actions/action2/.gitignore'
-      );
+      expect(exec).toHaveBeenNthCalledWith(5, 'sed', [
+        '-i',
+        '/node_modules/d',
+        'actions/action2/.gitignore',
+      ]);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        6,
-        'sed -i /build/d actions/action2/.gitignore'
-      );
+      expect(exec).toHaveBeenNthCalledWith(6, 'sed', [
+        '-i',
+        '/build/d',
+        'actions/action2/.gitignore',
+      ]);
 
-      expect(exec).toHaveBeenNthCalledWith(
-        7,
-        'yarn install',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(7, 'yarn install', [], {
+        cwd: 'actions/action2/',
+      });
 
-      expect(exec).toHaveBeenNthCalledWith(
-        8,
-        'yarn run build',
-        expect.anything()
-      );
+      expect(exec).toHaveBeenNthCalledWith(8, 'yarn run build', [], {
+        cwd: 'actions/action2/',
+      });
     });
   });
 });
