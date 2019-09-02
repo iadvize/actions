@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = __importDefault(require("path"));
 const fs_extra_1 = __importDefault(require("fs-extra"));
 const core = __importStar(require("@actions/core"));
-const exec_1 = require("./exec");
+const exec_1 = require("@actions/exec");
 function findJavascriptActions(rootDir) {
     return __awaiter(this, void 0, void 0, function* () {
         const contents = yield fs_extra_1.default.readdir(rootDir);
@@ -46,9 +46,9 @@ function cleanActionGitignore(actionDirectory, buildDirectory) {
             // nothing to do
             return;
         }
-        yield exec_1.exec(`sed -i /node_modules/d ${gitignorePath}`);
+        yield exec_1.exec('sed', ['-i', '/node_modules/d', gitignorePath]);
         if (buildDirectory) {
-            yield exec_1.exec(`sed -i /${buildDirectory}/d ${gitignorePath}`);
+            yield exec_1.exec('sed', ['-i', `/${buildDirectory}/d`, gitignorePath]);
         }
     });
 }
@@ -71,10 +71,10 @@ function run() {
                     cwd: actionDirectory,
                 };
                 console.log(`Installing ${actionDirectory}`);
-                yield exec_1.exec(installCommand, context);
+                yield exec_1.exec(installCommand, [], context);
                 if (buildDirectory) {
                     console.log(`Building ${actionDirectory}`);
-                    yield exec_1.exec(buildCommand, context);
+                    yield exec_1.exec(buildCommand, [], context);
                 }
                 console.log(`${actionDirectory} done`);
             }
