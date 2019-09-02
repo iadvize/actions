@@ -13,10 +13,12 @@ jobs:
       - name: 'Build comment message'
         id: buildMessage
         env:
-          branch: ${{ github.event.head_ref }}
+          branch: ${{ github.event.pull_request.head.ref }}
         run: |
-          message="Hello! You can find the temporary released actions in the `release-$branch` branch"
-          echo "::[set-output name=message;]$message"
+          releaseBranch=release-$branch
+          message='Hello! You can find the temporarily released actions in the [`'$releaseBranch'`](https://github.com/'$GITHUB_REPOSITORY'/tree/'$releaseBranch') branch'
+
+          echo "##[set-output name=message;]$message"
 
       - name: 'Comment on PR'
         uses: iadvize/actions/issue-comment@d25c66574f9e233663f1bb0e7efa70628abc12ea
@@ -24,5 +26,5 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue_number: ${{ github.event.number }}
-          comment: ${{ steps.buildMessage.message }}
+          comment: ${{ steps.buildMessage.outputs.message }}
 
