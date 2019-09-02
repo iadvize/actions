@@ -10,6 +10,11 @@ jobs:
     name: 'Comment with release branch'
 
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       - name: 'Build comment message'
         id: buildMessage
         env:
@@ -31,5 +36,5 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue_number: ${{ github.event.number }}
-          comment: ${{ steps.buildMessage.message }}
+          comment: ${{ steps.buildMessage.outputs.message }}
 
