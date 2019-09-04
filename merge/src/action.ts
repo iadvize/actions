@@ -3,11 +3,71 @@ import * as core from '@actions/core';
 import { GitHub, context } from '@actions/github';
 import { PullsGetResponse } from '@octokit/rest';
 
+import { removePRLabel } from './label';
+import { sendPRComment } from './comment';
+import { delay } from './delay';
+
+const RETRY_DELAY = 5000;
+
 const hasLabel = (label: string, pull: PullsGetResponse) => {
   const { labels } = pull;
 
   return labels.find(currentLanel => currentLanel.name === label);
 };
+
+type MergeResult = 'done' | 'impossible' | 'need retry';
+async function merge(
+  github: GitHub,
+  pullNumber: PullsGetResponse['number'],
+  label: string | null
+): Promise<MergeResult> {
+  const response = await github.pulls.get({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    pull_number: pullNumber,
+  });
+
+  if (response.status !== 200) {
+    throw new Error(
+      `Cannot get pull request #${pullNumber}. Status ${response.status}.`
+    );
+  }
+
+  const pull = response.data;
+
+  if (label && !hasLabel(label, pull)) {
+    console.log(`Pull request has no ${label} label. Stopping.`);
+    return 'done';
+  }
+
+  console.log(`Mergeable is ${pull.mergeable}`);
+  if (pull.mergeable === null) {
+    console.log('Need retry');
+    return 'need retry';
+  }
+
+  if (pull.mergeable !== true) {
+    return 'impossible';
+  }
+
+  const mergeResponse = await github.pulls.merge({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    pull_number: pullNumber,
+  });
+
+  if (mergeResponse.status === 200) {
+    return 'done';
+  } else {
+    throw new Error(
+      `Failed to merge #${pullNumber}. Status ${mergeResponse.status}`
+    );
+  }
+}
 
 export async function run() {
   try {
@@ -38,10 +98,6 @@ export async function run() {
 
     const pullInfos = pulls[0];
 
-    console.log(
-      `Will try to merge pull requeqst #${pullInfos.number} (${pullInfos.head.ref})`
-    );
-
     const githubToken = core.getInput('token', {
       required: true,
     });
@@ -50,50 +106,35 @@ export async function run() {
 
     const github = new GitHub(githubToken);
 
-    const response = await github.pulls.get({
-      owner: event.repository.owner.login,
-      repo: event.repository.name,
+    let numberRetries = 1;
+    let result: MergeResult = 'need retry';
+    do {
+      console.log(`Will try to merge pull requeqst #${pullInfos.number}`);
 
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      pull_number: pullInfos.number,
-    });
+      result = await merge(github, pullInfos.number, label);
+      console.log(`Merge result is ${result}`);
 
-    if (response.status !== 200) {
-      throw new Error(
-        `Cannot get pull request #${pullInfos.number}. Status ${response.status}.`
-      );
-    }
+      numberRetries++;
 
-    const pull = response.data;
+      await delay(RETRY_DELAY);
+    } while (numberRetries < 21 && result !== 'done');
 
-    if (label && !hasLabel(label, pull)) {
-      console.log(`Pull request has no ${label} label. Stopping.`);
+    if (result !== 'done') {
+      console.log(`Failed to merge pull request #${pullInfos.number}`);
+
+      if (label) {
+        await removePRLabel(github, pullInfos.number, label);
+        await sendPRComment(
+          github,
+          pullInfos.number,
+          `Removing label ${label} because pull request is not mergeable `
+        );
+      }
+
       return;
     }
 
-    console.log(`Mergeable state is ${pull.mergeable_state}`);
-    if (pull.mergeable_state !== 'clean') {
-      console.log('Mergeable state is not clean. Stopping.');
-      return;
-    }
-
-    const mergeResponse = await github.pulls.merge({
-      owner: event.repository.owner.login,
-      repo: event.repository.name,
-
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      pull_number: pullInfos.number,
-    });
-
-    if (mergeResponse.status === 200) {
-      console.log(
-        `Pull requeqst #${pullInfos.number} (${pullInfos.head.ref}) merged`
-      );
-    } else {
-      console.log(
-        `Failed to merge #${pullInfos.number} (${pullInfos.head.ref}). Status ${mergeResponse.status}`
-      );
-    }
+    console.log(`Pull request #${pullInfos.number} merged`);
   } catch (error) {
     console.error(error);
     core.setFailed(error.message);
