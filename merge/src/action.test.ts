@@ -21,6 +21,9 @@ const githubInstance = {
     get: jest.fn(),
     merge: jest.fn(),
   },
+  git: {
+    deleteRef: jest.fn(),
+  },
 };
 
 ((GitHub as unknown) as jest.Mock).mockImplementation(function() {
@@ -48,6 +51,7 @@ describe('action', () => {
   afterEach(() => {
     githubInstance.pulls.get.mockRestore();
     githubInstance.pulls.merge.mockRestore();
+    githubInstance.git.deleteRef.mockRestore();
 
     ((core.setFailed as unknown) as jest.Mock).mockReset();
 
@@ -123,6 +127,9 @@ describe('action', () => {
         case 'label':
           return '';
 
+        case 'shouldDeleteBranch':
+          return 'false';
+
         default:
           throw new Error('should not go here in getInput mock');
       }
@@ -170,6 +177,9 @@ describe('action', () => {
 
         case 'label':
           return '';
+
+        case 'shouldDeleteBranch':
+          return 'false';
 
         default:
           throw new Error('should not go here in getInput mock');
@@ -224,6 +234,9 @@ describe('action', () => {
 
         case 'label':
           return label;
+
+        case 'shouldDeleteBranch':
+          return 'false';
 
         default:
           throw new Error('should not go here in getInput mock');
@@ -291,6 +304,9 @@ describe('action', () => {
         case 'label':
           return label;
 
+        case 'shouldDeleteBranch':
+          return 'false';
+
         default:
           throw new Error('should not go here in getInput mock');
       }
@@ -357,6 +373,9 @@ describe('action', () => {
         case 'label':
           return '';
 
+        case 'shouldDeleteBranch':
+          return 'false';
+
         default:
           throw new Error('should not go here in getInput mock');
       }
@@ -420,6 +439,9 @@ describe('action', () => {
         case 'label':
           return '';
 
+        case 'shouldDeleteBranch':
+          return 'false';
+
         default:
           throw new Error('should not go here in getInput mock');
       }
@@ -476,6 +498,78 @@ describe('action', () => {
     expect(core.setFailed).not.toHaveBeenCalled();
   });
 
+  it('should delete branch after merge', async () => {
+    (core.getInput as jest.Mock).mockImplementation((input: string): string => {
+      switch (input) {
+        case 'token':
+          return githubToken;
+
+        case 'label':
+          return '';
+
+        case 'shouldDeleteBranch':
+          return 'true';
+
+        default:
+          throw new Error('should not go here in getInput mock');
+      }
+    });
+
+    const pullInfos = {
+      number: 12,
+      head: {
+        ref: 'branch',
+      },
+    };
+
+    const event = {
+      action: 'completed',
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      check_suite: {
+        conclusion: 'success',
+
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        pull_requests: [pullInfos],
+      },
+    };
+
+    context.eventName = 'check_suite';
+    context.payload = event;
+
+    const pull = {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      mergeable: true,
+      head: {
+        ref: 'branch',
+      },
+    };
+
+    const response = {
+      status: 200,
+      data: pull,
+    };
+
+    githubInstance.pulls.get.mockResolvedValue(response);
+
+    const mergeResponse = {
+      status: 200,
+    };
+
+    githubInstance.pulls.merge.mockResolvedValue(mergeResponse);
+
+    await expect(run()).resolves.toBeUndefined();
+
+    expect(githubInstance.pulls.merge).toHaveBeenCalled();
+    expect(githubInstance.git.deleteRef).toHaveBeenCalledWith({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+
+      ref: `heads/${pullInfos.head.ref}`,
+    });
+
+    expect(core.setFailed).not.toHaveBeenCalled();
+  });
+
   it('should retry merge two times', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
@@ -484,6 +578,9 @@ describe('action', () => {
 
         case 'label':
           return '';
+
+        case 'shouldDeleteBranch':
+          return 'false';
 
         default:
           throw new Error('should not go here in getInput mock');
@@ -567,6 +664,9 @@ describe('action', () => {
 
         case 'label':
           return label;
+
+        case 'shouldDeleteBranch':
+          return 'false';
 
         default:
           throw new Error('should not go here in getInput mock');
