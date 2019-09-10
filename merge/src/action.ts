@@ -42,6 +42,11 @@ async function merge(
     return 'skip';
   }
 
+  if (pull.state !== 'open') {
+    console.log(`Pull request is not open. Stopping.`);
+    return 'skip';
+  }
+
   console.log(`Mergeable is ${pull.mergeable}`);
   if (pull.mergeable === null) {
     console.log('Need retry');
