@@ -122,7 +122,7 @@ export async function run() {
     let numberRetries = 1;
     let result: MergeResult = 'need retry';
     do {
-      console.log(`Will try to merge pull requeqst #${pullInfos.number}`);
+      console.log(`Will try to merge pull request #${pullInfos.number}`);
 
       result = await merge(github, pullInfos.number, label);
       console.log(`Merge result is ${result}`);
