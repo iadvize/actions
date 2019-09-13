@@ -72,55 +72,6 @@ describe('action', () => {
     });
   });
 
-  it('should create a tmp directory and copy the current directory', async () => {
-    const tmpDir = {
-      removeCallback: jest.fn(),
-    };
-
-    ((tmp.dirSync as unknown) as jest.Mock).mockReturnValue(tmpDir);
-    ((exec as unknown) as jest.Mock).mockResolvedValue(0);
-
-    await expect(run()).resolves.toBeUndefined();
-
-    expect(core.getInput).toHaveBeenCalled();
-  });
-
-  it('should fail if tmp dir cannot be created', async () => {
-    ((tmp.dirSync as unknown) as jest.Mock).mockImplementation(() => {
-      throw new Error('ko');
-    });
-
-    await expect(run()).resolves.toBeUndefined();
-
-    expect(core.setFailed).toHaveBeenCalledWith('ko');
-  });
-
-  it('should fail if the copy of the current directory fails', async () => {
-    const tmpDir = {
-      removeCallback: jest.fn(),
-    };
-
-    ((tmp.dirSync as unknown) as jest.Mock).mockReturnValue(tmpDir);
-    ((exec as unknown) as jest.Mock).mockRejectedValue(new Error('kooo'));
-
-    await expect(run()).resolves.toBeUndefined();
-
-    expect(core.setFailed).toHaveBeenCalledWith('kooo');
-  });
-
-  it('should always try to remove tmp directory', async () => {
-    const tmpDir = {
-      removeCallback: jest.fn(),
-    };
-
-    ((tmp.dirSync as unknown) as jest.Mock).mockReturnValue(tmpDir);
-    ((exec as unknown) as jest.Mock).mockRejectedValue(new Error('kooo'));
-
-    await expect(run()).resolves.toBeUndefined();
-
-    expect(tmpDir.removeCallback).toHaveBeenCalledWith();
-  });
-
   it('should search for pull requests', async () => {
     const tmpDir = {
       removeCallback: jest.fn(),
@@ -246,6 +197,56 @@ describe('action', () => {
       base: pullBase,
       head: pullHead,
     };
+
+    it('should create a tmp directory and copy the current directory', async () => {
+      const tmpDir = {
+        removeCallback: jest.fn(),
+      };
+
+      ((tmp.dirSync as unknown) as jest.Mock).mockReturnValue(tmpDir);
+      ((exec as unknown) as jest.Mock).mockResolvedValue(0);
+      (searchForPullsToRebase as jest.Mock).mockResolvedValue(pulls);
+      (rebasePullsWorkflow as jest.Mock).mockImplementation(
+        async (
+          _: GitHub,
+          __: PullsGetResponse['number'][],
+          ___: boolean,
+          rebase: RebaseCallback
+        ) => {
+          await rebase(pull as PullsGetResponse);
+        }
+      );
+
+      await expect(run()).resolves.toBeUndefined();
+
+      expect(tmp.dirSync).toHaveBeenCalled();
+    });
+
+    it('should always try to remove tmp directory', async () => {
+      const tmpDir = {
+        removeCallback: jest.fn(),
+      };
+
+      ((tmp.dirSync as unknown) as jest.Mock).mockReturnValue(tmpDir);
+      ((exec as unknown) as jest.Mock).mockImplementation(() => {
+        throw new Error('KO');
+      });
+      (searchForPullsToRebase as jest.Mock).mockResolvedValue(pulls);
+      (rebasePullsWorkflow as jest.Mock).mockImplementation(
+        async (
+          _: GitHub,
+          __: PullsGetResponse['number'][],
+          ___: boolean,
+          rebase: RebaseCallback
+        ) => {
+          await rebase(pull as PullsGetResponse);
+        }
+      );
+
+      await expect(run()).resolves.toBeUndefined();
+
+      expect(tmpDir.removeCallback).toHaveBeenCalled();
+    });
 
     it('should checkout, rebase and push ', async () => {
       ((tmp.dirSync as unknown) as jest.Mock).mockReturnValue(tmpDir);

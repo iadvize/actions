@@ -75,17 +75,7 @@ async function checkoutRebaseAndPush(
 }
 
 export async function run() {
-  let tmpDir: tmp.DirResult = {
-    name: '',
-    removeCallback: () => {},
-  };
-
   try {
-    tmpDir = tmp.dirSync();
-
-    // copy the current directory somewhere to not affect the repo
-    await exec('cp', ['-r', '.', tmpDir.name]);
-
     const githubToken = core.getInput('token', {
       required: true,
     });
@@ -115,9 +105,23 @@ export async function run() {
         prNumbers,
         onlyOne,
         async (pull: PullsGetResponse) => {
-          const git = Git(githubToken, tmpDir.name);
+          let tmpDir: tmp.DirResult = {
+            name: '',
+            removeCallback: () => {},
+          };
 
-          return checkoutRebaseAndPush(git, pull);
+          try {
+            tmpDir = tmp.dirSync();
+
+            // copy the current directory somewhere to not affect the repo
+            await exec('cp', ['-r', '.', tmpDir.name]);
+
+            const git = Git(githubToken, tmpDir.name);
+
+            return checkoutRebaseAndPush(git, pull);
+          } finally {
+            tmpDir && tmpDir.removeCallback();
+          }
         },
         async (pullNumber, reason) => {
           if (label) {
@@ -134,7 +138,5 @@ export async function run() {
   } catch (error) {
     console.error(error);
     core.setFailed(error.message);
-  } finally {
-    tmpDir && tmpDir.removeCallback();
   }
 }
