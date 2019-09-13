@@ -15,7 +15,7 @@ const hasLabel = (label: string, pull: PullsGetResponse) => {
   return labels.find(currentLanel => currentLanel.name === label);
 };
 
-type MergeResult = 'done' | 'impossible' | 'need retry';
+type MergeResult = 'done' | 'skip' | 'impossible' | 'need retry';
 async function merge(
   github: GitHub,
   pullNumber: PullsGetResponse['number'],
@@ -39,7 +39,12 @@ async function merge(
 
   if (label && !hasLabel(label, pull)) {
     console.log(`Pull request has no ${label} label. Stopping.`);
-    return 'done';
+    return 'skip';
+  }
+
+  if (pull.state !== 'open') {
+    console.log(`Pull request is not open. Stopping.`);
+    return 'skip';
   }
 
   console.log(`Mergeable is ${pull.mergeable}`);
@@ -67,6 +72,17 @@ async function merge(
       `Failed to merge #${pullNumber}. Status ${mergeResponse.status}`
     );
   }
+}
+
+async function deleteBranch(github: GitHub, ref: string) {
+  console.log('Deleting ref', ref);
+
+  return github.git.deleteRef({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+
+    ref,
+  });
 }
 
 export async function run() {
@@ -104,12 +120,14 @@ export async function run() {
 
     const label = core.getInput('label') || null;
 
+    const shouldDeleteBranch = core.getInput('shouldDeleteBranch') === 'true';
+
     const github = new GitHub(githubToken);
 
     let numberRetries = 1;
     let result: MergeResult = 'need retry';
     do {
-      console.log(`Will try to merge pull requeqst #${pullInfos.number}`);
+      console.log(`Will try to merge pull request #${pullInfos.number}`);
 
       result = await merge(github, pullInfos.number, label);
       console.log(`Merge result is ${result}`);
@@ -119,7 +137,7 @@ export async function run() {
       await delay(RETRY_DELAY);
     } while (numberRetries < 21 && result !== 'done');
 
-    if (result !== 'done') {
+    if (result !== 'done' && result !== 'skip') {
       console.log(`Failed to merge pull request #${pullInfos.number}`);
 
       if (label) {
@@ -132,6 +150,8 @@ export async function run() {
       }
 
       return;
+    } else if (result === 'done' && shouldDeleteBranch) {
+      await deleteBranch(github, `heads/${pullInfos.head.ref}`);
     }
 
     console.log(`Pull request #${pullInfos.number} merged`);
