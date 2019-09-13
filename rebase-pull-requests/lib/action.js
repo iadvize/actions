@@ -73,14 +73,7 @@ function checkoutRebaseAndPush(git, pull) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        let tmpDir = {
-            name: '',
-            removeCallback: () => { },
-        };
         try {
-            tmpDir = tmp_1.default.dirSync();
-            // copy the current directory somewhere to not affect the repo
-            yield exec_1.exec('cp', ['-r', '.', tmpDir.name]);
             const githubToken = core.getInput('token', {
                 required: true,
             });
@@ -100,8 +93,20 @@ function run() {
             else {
                 const prNumbers = pulls.map(pr => pr.number);
                 yield rebase_1.rebasePullsWorkflow(github, prNumbers, onlyOne, (pull) => __awaiter(this, void 0, void 0, function* () {
-                    const git = git_1.Git(githubToken, tmpDir.name);
-                    return checkoutRebaseAndPush(git, pull);
+                    let tmpDir = {
+                        name: '',
+                        removeCallback: () => { },
+                    };
+                    try {
+                        tmpDir = tmp_1.default.dirSync();
+                        // copy the current directory somewhere to not affect the repo
+                        yield exec_1.exec('cp', ['-r', '.', tmpDir.name]);
+                        const git = git_1.Git(githubToken, tmpDir.name);
+                        return checkoutRebaseAndPush(git, pull);
+                    }
+                    finally {
+                        tmpDir && tmpDir.removeCallback();
+                    }
                 }), (pullNumber, reason) => __awaiter(this, void 0, void 0, function* () {
                     if (label) {
                         console.log(`Removing ${label} label for #${pullNumber}`);
@@ -116,9 +121,6 @@ function run() {
         catch (error) {
             console.error(error);
             core.setFailed(error.message);
-        }
-        finally {
-            tmpDir && tmpDir.removeCallback();
         }
     });
 }
