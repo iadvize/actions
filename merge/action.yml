@@ -14,7 +14,7 @@ inputs:
   shouldDeleteBranch:
     description: 'Should we delete the branch after merge?'
     required: false
-    default: true
+    default: false
 
 runs:
   using: 'node12'
