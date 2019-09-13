@@ -40,7 +40,11 @@ function merge(github, pullNumber, label) {
         const pull = response.data;
         if (label && !hasLabel(label, pull)) {
             console.log(`Pull request has no ${label} label. Stopping.`);
-            return 'done';
+            return 'skip';
+        }
+        if (pull.state !== 'open') {
+            console.log(`Pull request is not open. Stopping.`);
+            return 'skip';
         }
         console.log(`Mergeable is ${pull.mergeable}`);
         if (pull.mergeable === null) {
@@ -62,6 +66,16 @@ function merge(github, pullNumber, label) {
         else {
             throw new Error(`Failed to merge #${pullNumber}. Status ${mergeResponse.status}`);
         }
+    });
+}
+function deleteBranch(github, ref) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('Deleting ref', ref);
+        return github.git.deleteRef({
+            owner: github_1.context.repo.owner,
+            repo: github_1.context.repo.repo,
+            ref,
+        });
     });
 }
 function run() {
@@ -90,23 +104,27 @@ function run() {
                 required: true,
             });
             const label = core.getInput('label') || null;
+            const shouldDeleteBranch = core.getInput('shouldDeleteBranch') === 'true';
             const github = new github_1.GitHub(githubToken);
             let numberRetries = 1;
             let result = 'need retry';
             do {
-                console.log(`Will try to merge pull requeqst #${pullInfos.number}`);
+                console.log(`Will try to merge pull request #${pullInfos.number}`);
                 result = yield merge(github, pullInfos.number, label);
                 console.log(`Merge result is ${result}`);
                 numberRetries++;
                 yield delay_1.delay(RETRY_DELAY);
             } while (numberRetries < 21 && result !== 'done');
-            if (result !== 'done') {
+            if (result !== 'done' && result !== 'skip') {
                 console.log(`Failed to merge pull request #${pullInfos.number}`);
                 if (label) {
                     yield label_1.removePRLabel(github, pullInfos.number, label);
                     yield comment_1.sendPRComment(github, pullInfos.number, `Removing label ${label} because pull request is not mergeable `);
                 }
                 return;
+            }
+            else if (result === 'done' && shouldDeleteBranch) {
+                yield deleteBranch(github, `heads/${pullInfos.head.ref}`);
             }
             console.log(`Pull request #${pullInfos.number} merged`);
         }
