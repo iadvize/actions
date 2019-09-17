@@ -48,6 +48,7 @@ async function merge(
   }
 
   console.log(`Mergeable is ${pull.mergeable}`);
+  console.log(`Mergeable state is ${pull.mergeable_state}`);
   if (pull.mergeable === null) {
     console.log('Need retry');
     return 'need retry';
