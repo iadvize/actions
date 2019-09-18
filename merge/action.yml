@@ -7,6 +7,10 @@ inputs:
     description: A Github token.
     required: true
 
+  pullNumber:
+    description: 'The pull request number to merge'
+    required: true
+
   label:
     description: 'Only merge pull requests with this label'
     required: false

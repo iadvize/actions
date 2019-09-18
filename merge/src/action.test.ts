@@ -54,69 +54,12 @@ describe('action', () => {
     (console.log as jest.Mock).mockReset();
   });
 
-  it('should fail if not called on a check_suite event', async () => {
-    context.eventName = 'toto';
-
-    await expect(run()).resolves.toBeUndefined();
-
-    expect(core.setFailed).toHaveBeenCalledWith(
-      'Should only run on check_suite'
-    );
-  });
-
-  it('should stop early if check_suite is not completed', async () => {
-    const event = {
-      action: 'toto',
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
-
-    await expect(run()).resolves.toBeUndefined();
-    expect(core.setFailed).not.toHaveBeenCalled();
-    expect(GitHub).not.toHaveBeenCalled();
-  });
-
-  it('should stop early if check_suite conclusion is not success', async () => {
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'toto',
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
-
-    await expect(run()).resolves.toBeUndefined();
-    expect(core.setFailed).not.toHaveBeenCalled();
-    expect(GitHub).not.toHaveBeenCalled();
-  });
-
-  it('should stop early if no prs for this check_suite', async () => {
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
-
-    await expect(run()).resolves.toBeUndefined();
-    expect(core.setFailed).not.toHaveBeenCalled();
-    expect(GitHub).not.toHaveBeenCalled();
-  });
-
-  it('should fail if cannot get PR', async () => {
+  it('should fail if cannot parse pullNumber', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return 'salut toi';
+
         case 'token':
           return githubToken;
 
@@ -128,23 +71,36 @@ describe('action', () => {
       }
     });
 
-    const pullInfos = {
-      number: 12,
+    const response = {
+      status: '400',
     };
 
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
+    githubInstance.pulls.get.mockResolvedValue(response);
 
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
+    await expect(run()).resolves.toBeUndefined();
 
-    context.eventName = 'check_suite';
-    context.payload = event;
+    expect(core.setFailed).toHaveBeenCalledWith('Cannot parse pull number');
+
+    expect(githubInstance.pulls.get).not.toHaveBeenCalled();
+    expect(githubInstance.pulls.merge).not.toHaveBeenCalled();
+  });
+
+  it('should fail if cannot get PR', async () => {
+    (core.getInput as jest.Mock).mockImplementation((input: string): string => {
+      switch (input) {
+        case 'pullNumber':
+          return '12';
+
+        case 'token':
+          return githubToken;
+
+        case 'label':
+          return '';
+
+        default:
+          throw new Error('should not go here in getInput mock');
+      }
+    });
 
     const response = {
       status: '400',
@@ -155,7 +111,7 @@ describe('action', () => {
     await expect(run()).resolves.toBeUndefined();
 
     expect(core.setFailed).toHaveBeenCalledWith(
-      `Cannot get pull request #${pullInfos.number}. Status ${response.status}.`
+      `Cannot get pull request #12. Status ${response.status}.`
     );
 
     expect(githubInstance.pulls.get).toHaveBeenCalled();
@@ -165,6 +121,9 @@ describe('action', () => {
   it('should stop if pr is open', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -175,24 +134,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'closed',
@@ -217,6 +158,9 @@ describe('action', () => {
   it('should stop if pr is not mergeable', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -227,24 +171,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -269,6 +195,9 @@ describe('action', () => {
   it('should stop if pr is not mergeable (mergeable_state is blocked)', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -279,24 +208,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -323,6 +234,9 @@ describe('action', () => {
   it('should stop if pr is not mergeable (mergeable_state is draft)', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -333,24 +247,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -379,6 +275,9 @@ describe('action', () => {
 
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -389,24 +288,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -445,6 +326,9 @@ describe('action', () => {
 
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -455,24 +339,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -511,6 +377,9 @@ describe('action', () => {
   it('should handle impossible merge', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -521,24 +390,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -567,13 +418,16 @@ describe('action', () => {
     expect(githubInstance.pulls.merge).toHaveBeenCalled();
 
     expect(core.setFailed).toHaveBeenCalledWith(
-      `Failed to merge #${pullInfos.number}. Status ${mergeResponse.status}`
+      `Failed to merge #12. Status ${mergeResponse.status}`
     );
   });
 
   it('should log successful merge', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -584,24 +438,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -629,9 +465,7 @@ describe('action', () => {
     expect(githubInstance.pulls.get).toHaveBeenCalled();
     expect(githubInstance.pulls.merge).toHaveBeenCalled();
 
-    expect(console.log).toHaveBeenCalledWith(
-      `Pull request #${pullInfos.number} merged`
-    );
+    expect(console.log).toHaveBeenCalledWith(`Pull request #12 merged`);
 
     expect(core.setFailed).not.toHaveBeenCalled();
   });
@@ -639,6 +473,9 @@ describe('action', () => {
   it('should retry merge two times', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -649,24 +486,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pullOne = {
       state: 'open',
@@ -715,9 +534,7 @@ describe('action', () => {
     expect(githubInstance.pulls.get).toHaveBeenCalledTimes(2);
     expect(githubInstance.pulls.merge).toHaveBeenCalledTimes(1);
 
-    expect(console.log).toHaveBeenCalledWith(
-      `Pull request #${pullInfos.number} merged`
-    );
+    expect(console.log).toHaveBeenCalledWith(`Pull request #12 merged`);
 
     expect(core.setFailed).not.toHaveBeenCalled();
   });
@@ -726,6 +543,9 @@ describe('action', () => {
     const label = 'toto';
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
+        case 'pullNumber':
+          return '12';
+
         case 'token':
           return githubToken;
 
@@ -736,24 +556,6 @@ describe('action', () => {
           throw new Error('should not go here in getInput mock');
       }
     });
-
-    const pullInfos = {
-      number: 12,
-    };
-
-    const event = {
-      action: 'completed',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      check_suite: {
-        conclusion: 'success',
-
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        pull_requests: [pullInfos],
-      },
-    };
-
-    context.eventName = 'check_suite';
-    context.payload = event;
 
     const pull = {
       state: 'open',
@@ -789,7 +591,7 @@ describe('action', () => {
     expect(githubInstance.pulls.merge).not.toHaveBeenCalled();
 
     expect(console.log).toHaveBeenCalledWith(
-      `Failed to merge pull request #${pullInfos.number}`
+      `Failed to merge pull request #12`
     );
 
     expect(removePRLabel).toHaveBeenCalledTimes(1);

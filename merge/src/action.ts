@@ -1,4 +1,3 @@
-import { WebhookPayloadCheckSuite } from '@octokit/webhooks';
 import * as core from '@actions/core';
 import { GitHub, context } from '@actions/github';
 import { PullsGetResponse } from '@octokit/rest';
@@ -80,62 +79,28 @@ async function merge(
   }
 }
 
-async function deleteBranch(github: GitHub, ref: string) {
-  console.log('Deleting ref', ref);
-
-  return github.git.deleteRef({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-
-    ref,
-  });
-}
-
 export async function run() {
   try {
-    if (context.eventName !== 'check_suite') {
-      throw new Error('Should only run on check_suite');
-    }
-
-    const event = context.payload as WebhookPayloadCheckSuite;
-
-    if (event.action !== 'completed') {
-      console.log('Check Suite is not completed. Nothing to do. Stopping.');
-      return;
-    }
-
-    if (event.check_suite.conclusion !== 'success') {
-      console.log('Check Suite is not completed. Nothing to do. Stopping.');
-      return;
-    }
-
-    const pulls = event.check_suite.pull_requests;
-
-    if (pulls.length === 0) {
-      console.log('No PR for this check_suite. Stopping.');
-      return;
-    }
-
-    console.log(`${pulls.length} pull request for this check_suite`);
-
-    const pullInfos = pulls[0];
-
     const githubToken = core.getInput('token', {
       required: true,
     });
 
-    const label = core.getInput('label') || null;
+    const pullNumber = parseInt(core.getInput('pullNumber'), 10);
 
-    const shouldDeleteBranch = core.getInput('shouldDeleteBranch') === 'true';
+    if (isNaN(pullNumber)) {
+      throw Error('Cannot parse pull number');
+    }
+
+    const label = core.getInput('label') || null;
 
     const github = new GitHub(githubToken);
 
     let numberRetries = 1;
     let result: MergeResult = 'need retry';
     do {
-      console.log(`Will try to merge pull request #${pullInfos.number}`);
+      console.log(`Will try to merge pull request #${pullNumber}`);
 
-      result = await merge(github, pullInfos.number, label);
+      result = await merge(github, pullNumber, label);
       console.log(`Merge result is ${result}`);
 
       numberRetries++;
@@ -144,13 +109,13 @@ export async function run() {
     } while (numberRetries < 21 && result === 'need retry');
 
     if (result !== 'done' && result !== 'skip') {
-      console.log(`Failed to merge pull request #${pullInfos.number}`);
+      console.log(`Failed to merge pull request #${pullNumber}`);
 
       if (label) {
-        await removePRLabel(github, pullInfos.number, label);
+        await removePRLabel(github, pullNumber, label);
         await sendPRComment(
           github,
-          pullInfos.number,
+          pullNumber,
           `Removing label ${label} because pull request is not mergeable `
         );
       }
@@ -159,7 +124,7 @@ export async function run() {
     }
 
     if (result === 'done') {
-      console.log(`Pull request #${pullInfos.number} merged`);
+      console.log(`Pull request #${pullNumber} merged`);
     }
   } catch (error) {
     console.error(error);
