@@ -58,8 +58,8 @@ async function merge(
     return 'impossible';
   }
 
-  if (pull.mergeable_state !== 'clean') {
-    console.log(`Mergeable state is not clean. Stopping`);
+  if (pull.mergeable_state === 'blocked' || pull.mergeable_state === 'draft') {
+    console.log(`Mergeable state is ${pull.mergeable_state}. Stopping`);
     return 'skip';
   }
 
@@ -163,7 +163,6 @@ export async function run() {
     if (result === 'done') {
       console.log(`Pull request #${pullInfos.number} merged`);
     }
-
   } catch (error) {
     console.error(error);
     core.setFailed(error.message);
