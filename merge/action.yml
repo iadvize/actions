@@ -11,11 +11,6 @@ inputs:
     description: 'Only merge pull requests with this label'
     required: false
 
-  shouldDeleteBranch:
-    description: 'Should we delete the branch after merge?'
-    required: false
-    default: false
-
 runs:
   using: 'node12'
   main: 'lib/main.js'

@@ -156,8 +156,6 @@ export async function run() {
       }
 
       return;
-    } else if (result === 'done' && shouldDeleteBranch) {
-      await deleteBranch(github, `heads/${pullInfos.head.ref}`);
     }
 
     if (result === 'done') {
