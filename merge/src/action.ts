@@ -58,6 +58,11 @@ async function merge(
     return 'impossible';
   }
 
+  if (pull.mergeable_state !== 'clean') {
+    console.log(`Mergeable state is not clean. Stopping`);
+    return 'skip';
+  }
+
   const mergeResponse = await github.pulls.merge({
     owner: context.repo.owner,
     repo: context.repo.repo,
