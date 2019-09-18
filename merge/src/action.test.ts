@@ -279,6 +279,120 @@ describe('action', () => {
     expect(core.setFailed).not.toHaveBeenCalled();
   });
 
+  it('should stop if pr is not mergeable (mergeable_state is blocked)', async () => {
+    (core.getInput as jest.Mock).mockImplementation((input: string): string => {
+      switch (input) {
+        case 'token':
+          return githubToken;
+
+        case 'label':
+          return '';
+
+        case 'shouldDeleteBranch':
+          return 'false';
+
+        default:
+          throw new Error('should not go here in getInput mock');
+      }
+    });
+
+    const pullInfos = {
+      number: 12,
+    };
+
+    const event = {
+      action: 'completed',
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      check_suite: {
+        conclusion: 'success',
+
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        pull_requests: [pullInfos],
+      },
+    };
+
+    context.eventName = 'check_suite';
+    context.payload = event;
+
+    const pull = {
+      state: 'open',
+      mergeable: true,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      mergeable_state: 'blocked',
+    };
+
+    const response = {
+      status: 200,
+      data: pull,
+    };
+
+    githubInstance.pulls.get.mockResolvedValue(response);
+
+    await expect(run()).resolves.toBeUndefined();
+
+    expect(githubInstance.pulls.get).toHaveBeenCalled();
+    expect(githubInstance.pulls.merge).not.toHaveBeenCalled();
+
+    expect(core.setFailed).not.toHaveBeenCalled();
+  });
+
+  it('should stop if pr is not mergeable (mergeable_state is draft)', async () => {
+    (core.getInput as jest.Mock).mockImplementation((input: string): string => {
+      switch (input) {
+        case 'token':
+          return githubToken;
+
+        case 'label':
+          return '';
+
+        case 'shouldDeleteBranch':
+          return 'false';
+
+        default:
+          throw new Error('should not go here in getInput mock');
+      }
+    });
+
+    const pullInfos = {
+      number: 12,
+    };
+
+    const event = {
+      action: 'completed',
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      check_suite: {
+        conclusion: 'success',
+
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        pull_requests: [pullInfos],
+      },
+    };
+
+    context.eventName = 'check_suite';
+    context.payload = event;
+
+    const pull = {
+      state: 'open',
+      mergeable: true,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      mergeable_state: 'draft',
+    };
+
+    const response = {
+      status: 200,
+      data: pull,
+    };
+
+    githubInstance.pulls.get.mockResolvedValue(response);
+
+    await expect(run()).resolves.toBeUndefined();
+
+    expect(githubInstance.pulls.get).toHaveBeenCalled();
+    expect(githubInstance.pulls.merge).not.toHaveBeenCalled();
+
+    expect(core.setFailed).not.toHaveBeenCalled();
+  });
+
   it('should stop if pr has not the required label', async () => {
     const label = 'my-label';
 
@@ -663,6 +777,8 @@ describe('action', () => {
     const pullOne = {
       state: 'open',
       mergeable: null,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      mergeable_state: 'unknown',
       head: {
         ref: 'branch',
       },
@@ -671,6 +787,8 @@ describe('action', () => {
     const pullTwo = {
       state: 'open',
       mergeable: true,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      mergeable_state: 'unknown',
       head: {
         ref: 'branch',
       },
