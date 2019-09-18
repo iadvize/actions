@@ -141,7 +141,7 @@ export async function run() {
       numberRetries++;
 
       await delay(RETRY_DELAY);
-    } while (numberRetries < 21 && result !== 'done');
+    } while (numberRetries < 21 && result === 'need retry');
 
     if (result !== 'done' && result !== 'skip') {
       console.log(`Failed to merge pull request #${pullInfos.number}`);
