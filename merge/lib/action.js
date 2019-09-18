@@ -47,12 +47,17 @@ function merge(github, pullNumber, label) {
             return 'skip';
         }
         console.log(`Mergeable is ${pull.mergeable}`);
+        console.log(`Mergeable state is ${pull.mergeable_state}`);
         if (pull.mergeable === null) {
             console.log('Need retry');
             return 'need retry';
         }
         if (pull.mergeable !== true) {
             return 'impossible';
+        }
+        if (pull.mergeable_state === 'blocked' || pull.mergeable_state === 'draft') {
+            console.log(`Mergeable state is ${pull.mergeable_state}. Stopping`);
+            return 'skip';
         }
         const mergeResponse = yield github.pulls.merge({
             owner: github_1.context.repo.owner,
@@ -114,7 +119,7 @@ function run() {
                 console.log(`Merge result is ${result}`);
                 numberRetries++;
                 yield delay_1.delay(RETRY_DELAY);
-            } while (numberRetries < 21 && result !== 'done');
+            } while (numberRetries < 21 && result === 'need retry');
             if (result !== 'done' && result !== 'skip') {
                 console.log(`Failed to merge pull request #${pullInfos.number}`);
                 if (label) {
@@ -126,7 +131,9 @@ function run() {
             else if (result === 'done' && shouldDeleteBranch) {
                 yield deleteBranch(github, `heads/${pullInfos.head.ref}`);
             }
-            console.log(`Pull request #${pullInfos.number} merged`);
+            if (result === 'done') {
+                console.log(`Pull request #${pullInfos.number} merged`);
+            }
         }
         catch (error) {
             console.error(error);
