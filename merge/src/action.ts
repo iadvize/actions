@@ -48,6 +48,7 @@ async function merge(
   }
 
   console.log(`Mergeable is ${pull.mergeable}`);
+  console.log(`Mergeable state is ${pull.mergeable_state}`);
   if (pull.mergeable === null) {
     console.log('Need retry');
     return 'need retry';
@@ -55,6 +56,11 @@ async function merge(
 
   if (pull.mergeable !== true) {
     return 'impossible';
+  }
+
+  if (pull.mergeable_state === 'blocked' || pull.mergeable_state === 'draft') {
+    console.log(`Mergeable state is ${pull.mergeable_state}. Stopping`);
+    return 'skip';
   }
 
   const mergeResponse = await github.pulls.merge({
@@ -135,7 +141,7 @@ export async function run() {
       numberRetries++;
 
       await delay(RETRY_DELAY);
-    } while (numberRetries < 21 && result !== 'done');
+    } while (numberRetries < 21 && result === 'need retry');
 
     if (result !== 'done' && result !== 'skip') {
       console.log(`Failed to merge pull request #${pullInfos.number}`);
@@ -154,7 +160,9 @@ export async function run() {
       await deleteBranch(github, `heads/${pullInfos.head.ref}`);
     }
 
-    console.log(`Pull request #${pullInfos.number} merged`);
+    if (result === 'done') {
+      console.log(`Pull request #${pullInfos.number} merged`);
+    }
   } catch (error) {
     console.error(error);
     core.setFailed(error.message);
