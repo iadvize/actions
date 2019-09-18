@@ -160,7 +160,10 @@ export async function run() {
       await deleteBranch(github, `heads/${pullInfos.head.ref}`);
     }
 
-    console.log(`Pull request #${pullInfos.number} merged`);
+    if (result === 'done') {
+      console.log(`Pull request #${pullInfos.number} merged`);
+    }
+
   } catch (error) {
     console.error(error);
     core.setFailed(error.message);
