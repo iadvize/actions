@@ -34,14 +34,13 @@ export async function run() {
     // TODO could also be a tag (https://help.github.com/en/articles/virtual-environments-for-github-actions)
     // should we handle it here ?
     const branch = ref.replace('refs/heads/', '');
+    console.log(`Trying to find pull request for branch ${branch}`);
 
     const github = new GitHub(githubToken);
 
     const query = `repo:${repository} is:pr head:${branch}`;
 
-    const {
-      data: { items },
-    } = await github.search.issuesAndPullRequests({
+    const { status, data } = await github.search.issuesAndPullRequests({
       q: query,
       sort: 'updated',
       order: 'desc',
@@ -49,18 +48,30 @@ export async function run() {
       per_page: 1,
     });
 
+    if (status !== 200) {
+      throw Error(`Search request error. Status ${status}`);
+    }
+
+    const { items } = data;
     const pulls = items as SearchPRResponse[];
 
     if (pulls.length === 0) {
+      console.log('Found 0 pull request');
+
       core.setOutput('pullExists', 'false');
       core.setOutput('pullNumber', '-1');
       return;
     }
 
-    const pull = pulls[0];
+    const pullNumbers = pulls.map(pull => pull.number);
+    console.log(
+      `Found ${pullNumbers.length} pull requests: ${pullNumbers.join(', ')}`
+    );
+
+    const pullNumber = pullNumbers[0];
 
     core.setOutput('pullExists', 'true');
-    core.setOutput('pullNumber', `${pull.number}`);
+    core.setOutput('pullNumber', `${pullNumber}`);
   } catch (error) {
     console.error(error);
     core.setFailed(error.message);
