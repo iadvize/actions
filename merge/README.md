@@ -21,6 +21,7 @@ jobs:
         if: github.event.action == 'completed'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          pullNumber: 12
 ```
 
 ### Inputs
