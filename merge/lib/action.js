@@ -73,66 +73,37 @@ function merge(github, pullNumber, label) {
         }
     });
 }
-function deleteBranch(github, ref) {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log('Deleting ref', ref);
-        return github.git.deleteRef({
-            owner: github_1.context.repo.owner,
-            repo: github_1.context.repo.repo,
-            ref,
-        });
-    });
-}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (github_1.context.eventName !== 'check_suite') {
-                throw new Error('Should only run on check_suite');
-            }
-            const event = github_1.context.payload;
-            if (event.action !== 'completed') {
-                console.log('Check Suite is not completed. Nothing to do. Stopping.');
-                return;
-            }
-            if (event.check_suite.conclusion !== 'success') {
-                console.log('Check Suite is not completed. Nothing to do. Stopping.');
-                return;
-            }
-            const pulls = event.check_suite.pull_requests;
-            if (pulls.length === 0) {
-                console.log('No PR for this check_suite. Stopping.');
-                return;
-            }
-            console.log(`${pulls.length} pull request for this check_suite`);
-            const pullInfos = pulls[0];
             const githubToken = core.getInput('token', {
                 required: true,
             });
+            const pullNumber = parseInt(core.getInput('pullNumber'), 10);
+            if (isNaN(pullNumber)) {
+                throw Error('Cannot parse pull number');
+            }
             const label = core.getInput('label') || null;
-            const shouldDeleteBranch = core.getInput('shouldDeleteBranch') === 'true';
             const github = new github_1.GitHub(githubToken);
             let numberRetries = 1;
             let result = 'need retry';
             do {
-                console.log(`Will try to merge pull request #${pullInfos.number}`);
-                result = yield merge(github, pullInfos.number, label);
+                console.log(`Will try to merge pull request #${pullNumber}`);
+                result = yield merge(github, pullNumber, label);
                 console.log(`Merge result is ${result}`);
                 numberRetries++;
                 yield delay_1.delay(RETRY_DELAY);
             } while (numberRetries < 21 && result === 'need retry');
             if (result !== 'done' && result !== 'skip') {
-                console.log(`Failed to merge pull request #${pullInfos.number}`);
+                console.log(`Failed to merge pull request #${pullNumber}`);
                 if (label) {
-                    yield label_1.removePRLabel(github, pullInfos.number, label);
-                    yield comment_1.sendPRComment(github, pullInfos.number, `Removing label ${label} because pull request is not mergeable `);
+                    yield label_1.removePRLabel(github, pullNumber, label);
+                    yield comment_1.sendPRComment(github, pullNumber, `Removing label ${label} because pull request is not mergeable `);
                 }
                 return;
             }
-            else if (result === 'done' && shouldDeleteBranch) {
-                yield deleteBranch(github, `heads/${pullInfos.head.ref}`);
-            }
             if (result === 'done') {
-                console.log(`Pull request #${pullInfos.number} merged`);
+                console.log(`Pull request #${pullNumber} merged`);
             }
         }
         catch (error) {
