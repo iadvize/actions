@@ -7,14 +7,13 @@ inputs:
     description: A Github token.
     required: true
 
+  pullNumber:
+    description: 'The pull request number to merge'
+    required: true
+
   label:
     description: 'Only merge pull requests with this label'
     required: false
-
-  shouldDeleteBranch:
-    description: 'Should we delete the branch after merge?'
-    required: false
-    default: false
 
 runs:
   using: 'node12'
