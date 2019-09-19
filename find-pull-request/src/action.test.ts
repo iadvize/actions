@@ -27,6 +27,40 @@ describe('action', () => {
     githubInstance.search.issuesAndPullRequests.mockRestore();
   });
 
+  it('should fail if github response is not 200', async () => {
+    (core.getInput as jest.Mock).mockImplementation((input: string): string => {
+      switch (input) {
+        case 'branch':
+          return branch;
+
+        case 'token':
+          return githubToken;
+
+        case 'repository':
+          return '';
+
+        default:
+          throw new Error('should not go here in getInput mock');
+      }
+    });
+
+    process.env.GITHUB_REPOSITORY = fullRepo;
+    process.env.GITHUB_REF = `refs/heads/toto`;
+
+    githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 400,
+      data: {
+        items: [],
+      },
+    });
+
+    await expect(run()).resolves.toBeUndefined();
+
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'Search request error. Status 400'
+    );
+  });
+
   it('should search for pr with input branch and GITHUB_REPOSITORY', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
@@ -48,6 +82,7 @@ describe('action', () => {
     process.env.GITHUB_REF = `refs/heads/toto`;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [],
       },
@@ -89,6 +124,7 @@ describe('action', () => {
     process.env.GITHUB_REF = `refs/heads/toto`;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [],
       },
@@ -130,6 +166,7 @@ describe('action', () => {
     process.env.GITHUB_REF = `refs/heads/${branch}`;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [],
       },
@@ -171,6 +208,7 @@ describe('action', () => {
     process.env.GITHUB_REF = `refs/heads/${branch}`;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [],
       },
@@ -212,6 +250,7 @@ describe('action', () => {
     process.env.GITHUB_REF = `refs/heads/${branch}`;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [],
       },
@@ -247,6 +286,7 @@ describe('action', () => {
     const pullNumber = 11113244;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [
           {
@@ -287,6 +327,7 @@ describe('action', () => {
     const pullNumber = 11113244;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [
           {
@@ -326,6 +367,7 @@ describe('action', () => {
     const pullNumber = 11113244;
 
     githubInstance.search.issuesAndPullRequests.mockResolvedValue({
+      status: 200,
       data: {
         items: [
           {
