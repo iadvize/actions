@@ -57,7 +57,11 @@ async function merge(
     return 'impossible';
   }
 
-  if (pull.mergeable_state === 'blocked' || pull.mergeable_state === 'draft') {
+  if (
+    pull.mergeable_state === 'blocked' ||
+    pull.mergeable_state === 'draft' ||
+    pull.mergeable_state === 'behind'
+  ) {
     console.log(`Mergeable state is ${pull.mergeable_state}. Stopping`);
     return 'skip';
   }

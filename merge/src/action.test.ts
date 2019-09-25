@@ -231,6 +231,45 @@ describe('action', () => {
     expect(core.setFailed).not.toHaveBeenCalled();
   });
 
+  it('should stop if pr is not mergeable (mergeable_state is behind)', async () => {
+    (core.getInput as jest.Mock).mockImplementation((input: string): string => {
+      switch (input) {
+        case 'pullNumber':
+          return '12';
+
+        case 'token':
+          return githubToken;
+
+        case 'label':
+          return '';
+
+        default:
+          throw new Error('should not go here in getInput mock');
+      }
+    });
+
+    const pull = {
+      state: 'open',
+      mergeable: true,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      mergeable_state: 'behind',
+    };
+
+    const response = {
+      status: 200,
+      data: pull,
+    };
+
+    githubInstance.pulls.get.mockResolvedValue(response);
+
+    await expect(run()).resolves.toBeUndefined();
+
+    expect(githubInstance.pulls.get).toHaveBeenCalled();
+    expect(githubInstance.pulls.merge).not.toHaveBeenCalled();
+
+    expect(core.setFailed).not.toHaveBeenCalled();
+  });
+
   it('should stop if pr is not mergeable (mergeable_state is draft)', async () => {
     (core.getInput as jest.Mock).mockImplementation((input: string): string => {
       switch (input) {
