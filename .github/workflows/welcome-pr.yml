@@ -18,7 +18,7 @@ jobs:
           releaseBranch=release-$branch
           message='Hello! You can find the temporarily released actions in the [`'$releaseBranch'`](https://github.com/'$GITHUB_REPOSITORY'/tree/'$releaseBranch') branch'
 
-          echo ::set-output name=message::message$
+          echo ::set-output name=message::$message
 
       - name: 'Comment on PR'
         uses: actions/github@v1.0.0
