@@ -8,7 +8,6 @@ It contains :
 
 - [`iadvize/actions/build-javascript-actions`](./build-javascript-actions) 
 - [`iadvize/actions/find-pull-request`](./find-pull-request) 
-- [`iadvize/actions/issue-comment`](./issue-comment) 
 - [`iadvize/actions/merge`](./merge) 
 - [`iadvize/actions/rebase-pull-requests`](./rebase-pull-requests) 
 
