@@ -1,0 +1,18 @@
+name: Assert labels
+author: Guillaume Clochard <guillaume.clochard@iadvize.com>
+description: Use this actions to assert labels presence on pull request
+
+inputs:
+  only-one-of:
+    description: >
+      The list of labels (strings separated by coma). If no labels of this list
+      is present on the PR it will fail. If more than one it will fail too.
+    required: true
+
+runs:
+  using: 'node12'
+  main: 'lib/main.js'
+
+branding:
+  color: 'green'
+  icon: 'check-circle'

@@ -10,6 +10,7 @@ It contains :
 - [`iadvize/actions/find-pull-request`](./find-pull-request) 
 - [`iadvize/actions/merge`](./merge) 
 - [`iadvize/actions/rebase-pull-requests`](./rebase-pull-requests) 
+- [`iadvize/actions/assert-labels`](./assert-labels) 
 
 ## Usage
 
