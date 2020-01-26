@@ -1,0 +1,17 @@
+name: Bump changelog
+author: Guillaume Clochard <guillaume.clochard@iadvize.com>
+description: Use this actions to bump a keepachangelog changelog versio
+
+inputs:
+  path:
+    description: >
+      The path to the changelog file
+    required: true
+
+runs:
+  using: 'node12'
+  main: 'lib/main.js'
+
+branding:
+  color: 'purple'
+  icon: 'arrow-up-right'
