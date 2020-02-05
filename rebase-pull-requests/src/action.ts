@@ -42,7 +42,7 @@ async function checkoutRebaseAndPush(
 
   console.log(`Retrieve up-to-date head sha for ${head.ref} branch`);
   const currentSha = await git.currentSha(`origin/${head.ref}`);
-  console.log(`Up-to-date head sha is ${currentSha}`);
+  console.log(`Up-to-date head sha is ${head.sha}`);
   console.log(`Local head sha is ${currentSha}`);
 
   if (head.sha !== currentSha) {
