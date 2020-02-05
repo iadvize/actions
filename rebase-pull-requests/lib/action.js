@@ -49,7 +49,7 @@ function checkoutRebaseAndPush(git, pull) {
         yield git.fetch(head.ref);
         console.log(`Retrieve up-to-date head sha for ${head.ref} branch`);
         const currentSha = yield git.currentSha(`origin/${head.ref}`);
-        console.log(`Up-to-date head sha is ${currentSha}`);
+        console.log(`Up-to-date head sha is ${head.sha}`);
         console.log(`Local head sha is ${currentSha}`);
         if (head.sha !== currentSha) {
             console.log(`Pull request has been updated while running action. Skipping.`);
