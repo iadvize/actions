@@ -57,7 +57,7 @@ describe('comment', () => {
 
   it('should call api to search pulls without label', async () => {
     const base = 'toto';
-    const label = 'something';
+    const label = 'something: hello';
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
@@ -83,7 +83,7 @@ describe('comment', () => {
       searchForPullsToRebase((githubInstance as unknown) as GitHub, base, label)
     ).resolves.toEqual(pulls);
 
-    const query = `repo:${context.repo.owner}/${context.repo.repo} is:pr base:${base} state:open label:${label}`;
+    const query = `repo:${context.repo.owner}/${context.repo.repo} is:pr base:${base} state:open label:"${label}"`;
 
     expect(githubInstance.search.issuesAndPullRequests).toHaveBeenCalledWith({
       q: query,

@@ -14,7 +14,7 @@ export async function searchForPullsToRebase(
   label: string | null
 ) {
   const baseQuery = `repo:${context.repo.owner}/${context.repo.repo} is:pr base:${base} state:open`;
-  const query = label ? `${baseQuery} label:${label}` : baseQuery;
+  const query = label ? `${baseQuery} label:"${label}"` : baseQuery;
 
   const response = await github.search.issuesAndPullRequests({
     q: query,
