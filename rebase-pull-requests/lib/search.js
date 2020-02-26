@@ -13,7 +13,7 @@ const github_1 = require("@actions/github");
 function searchForPullsToRebase(github, base, label) {
     return __awaiter(this, void 0, void 0, function* () {
         const baseQuery = `repo:${github_1.context.repo.owner}/${github_1.context.repo.repo} is:pr base:${base} state:open`;
-        const query = label ? `${baseQuery} label:${label}` : baseQuery;
+        const query = label ? `${baseQuery} label:"${label}"` : baseQuery;
         const response = yield github.search.issuesAndPullRequests({
             q: query,
             sort: 'created',
